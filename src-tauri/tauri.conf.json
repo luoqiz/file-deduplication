@@ -12,9 +12,9 @@
   "app": {
     "windows": [
       {
-        "title": "file-deduplication",
-        "width": 800,
-        "height": 600
+        "title": "文件去重整理工具",
+        "width": 1200,
+        "height": 800
       }
     ],
     "security": {
