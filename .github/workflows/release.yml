@@ -1,0 +1,111 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ubuntu-20.04, windows-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Get current version
+        id: version
+        run: |
+          $version = Select-String -Path "package.json" -Pattern '"version": "(.*?)"' | ForEach-Object {$_.Matches.Groups[1].Value}
+          Write-Output "current=$version" >> $env:GITHUB_OUTPUT
+        shell: powershell
+        if: runner.os == 'Windows'
+
+      - name: Get current version (Unix)
+        id: version-unix
+        run: |
+          version=$(grep '"version"' package.json | sed 's/.*"version": "\(.*\)".*/\1/')
+          echo "current=$version" >> $GITHUB_OUTPUT
+        if: runner.os != 'Windows'
+
+      - name: Bump version
+        id: bump
+        run: |
+          $version = "${{ steps.version.outputs.current || steps.version-unix.outputs.current }}"
+          $parts = $version.Split('.')
+          $parts[2] = [int]$parts[2] + 1
+          $newVersion = $parts -join '.'
+          Write-Output "new=$newVersion" >> $env:GITHUB_OUTPUT
+          Write-Output "Version bumped from $version to $newVersion"
+        shell: powershell
+        if: always()
+
+      - name: Update package.json version
+        run: |
+          $content = Get-Content "package.json" -Raw
+          $content = $content -replace '"version": "[^"]*"', """version"": ""${{ steps.bump.outputs.new }}"""
+          Set-Content "package.json" $content
+        shell: powershell
+        if: runner.os == 'Windows'
+
+      - name: Update Cargo.toml version
+        run: |
+          $content = Get-Content "src-tauri\Cargo.toml" -Raw
+          $content = $content -replace 'version = "[^"]*"', """version = ""${{ steps.bump.outputs.new }}""" -CaseSensitive
+          Set-Content "src-tauri\Cargo.toml" $content
+        shell: powershell
+        if: runner.os == 'Windows'
+
+      - name: Update versions (Unix)
+        run: |
+          sed -i 's/"version": "[^"]*"/"version": "${{ steps.bump.outputs.new }}"/' package.json
+          sed -i 's/^version = "[^"]*"/version = "${{ steps.bump.outputs.new }}"/' src-tauri/Cargo.toml
+        if: runner.os != 'Windows'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build
+        run: pnpm build
+
+      - name: Build Tauri app
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: v${{ steps.bump.outputs.new }}
+          releaseName: "Release v${{ steps.bump.outputs.new }}"
+          releaseBody: "See assets below to download and install this version."
+          releaseDraft: false
+          prerelease: false
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Commit and push version update
+        run: |
+          git add package.json src-tauri/Cargo.toml
+          git commit -m "chore: bump version to ${{ steps.bump.outputs.new }}"
+          git push
+        if: runner.os == 'Windows'
