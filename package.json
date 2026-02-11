@@ -6,9 +6,9 @@
   "scripts": {
     "dev": "vite",
     "tauri:dev": "pnpm tauri dev",
+    "tauri:build": "pnpm tauri build",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
-    "install": "pnpm install",
     "tauri": "tauri"
   },
   "dependencies": {
