@@ -27,6 +27,9 @@ jobs:
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          targets: x86_64-pc-windows-msvc
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
