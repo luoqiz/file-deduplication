@@ -71,7 +71,7 @@ jobs:
       - name: Update Cargo.toml version
         run: |
           $content = Get-Content "src-tauri\Cargo.toml" -Raw
-          $content = $content -replace 'version = "[^"]*"', """version = ""${{ steps.bump.outputs.new }}""" -CaseSensitive
+          $content = $content -replace 'version = "[^"]*"', """version = ""${{ steps.bump.outputs.new }}"""
           Set-Content "src-tauri\Cargo.toml" $content
         shell: powershell
         if: runner.os == 'Windows'
