@@ -73,12 +73,12 @@ jobs:
 
       - name: Update Cargo.toml version
         run: |
-          $content = Get-Content "src-tauri\Cargo.toml" -Raw
-          # Only replace the version in [package] section (first occurrence)
-          $content = $content -replace '(?m)^version\s*=\s*"[^"]*"', "version = ""${{ steps.bump.outputs.new }}""", 1
-          Set-Content "src-tauri\Cargo.toml" $content
-          $content = Get-Content "src-tauri\Cargo.toml" -Raw
-          Write-Output "Updated Cargo.toml content:`n$content"
+          $cargoPath = "src-tauri\Cargo.toml"
+          $content = Get-Content $cargoPath -Raw
+          $regex = [regex]'version\s*=\s*"[^"]*"'
+          $newContent = $regex.Replace($content, "version = ""${{ steps.bump.outputs.new }}""", 1)
+          Set-Content $cargoPath $newContent
+          Write-Output "Updated version in Cargo.toml"
         shell: powershell
         if: runner.os == 'Windows'
 
