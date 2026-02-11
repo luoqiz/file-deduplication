@@ -74,7 +74,8 @@ jobs:
       - name: Update Cargo.toml version
         run: |
           $content = Get-Content "src-tauri\Cargo.toml" -Raw
-          $content = $content -replace '(\[package\]\s+name\s+=\s+"[^"]+"\s+version\s+=\s+")[^"]*"', "`$1${{ steps.bump.outputs.new }}`""
+          # Only replace the version in [package] section (first occurrence)
+          $content = $content -replace '(?m)^version\s*=\s*"[^"]*"', "version = ""${{ steps.bump.outputs.new }}""", 1
           Set-Content "src-tauri\Cargo.toml" $content
           $content = Get-Content "src-tauri\Cargo.toml" -Raw
           Write-Output "Updated Cargo.toml content:`n$content"
