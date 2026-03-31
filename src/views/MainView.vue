@@ -24,6 +24,10 @@
         <p>已跳过: {{ result.skipped_files.length }}</p>
         <p v-if="dryRun" class="dry-run-notice">注意：这是预览模式，未执行实际操作</p>
       </div>
+     <div class="detailed-results" v-if="treeNodes.length">
+        <h4>详细结果树</h4>
+        <ResultTree :nodes="treeNodes" />
+      </div>
     </div>
   </div>
 </template>
@@ -32,6 +36,7 @@
 import { computed, onMounted } from "vue";
 import { useSettings } from "@/composables/useSettings";
 import { useFileOperations } from "@/composables/useFileOperations";
+import ResultTree from "@/components/ResultTree.vue";
 
 const {
   selectedFolder,
@@ -57,6 +62,42 @@ const {
 const confirmButtonDisabled = computed(
   () => processing.value || !selectedFolder.value,
 );
+
+interface TreeNode {
+  name: string;
+  children: TreeNode[];
+}
+
+function buildTree(paths: string[]): TreeNode[] {
+  const root: Record<string, any> = {};
+
+  for (const path of paths) {
+    const parts = path.split("/");
+    let current = root;
+    for (const part of parts) {
+      if (!current[part]) {
+        current[part] = {};
+      }
+      current = current[part];
+    }
+  }
+
+  function convert(node: Record<string, any>): TreeNode[] {
+    return Object.keys(node).map((name) => ({
+      name,
+      children: convert(node[name]),
+    }));
+  }
+
+  return convert(root);
+}
+
+const treeNodes = computed(() => {
+  if (!result.value) {
+    return [];
+  }
+  return buildTree(result.value.moved_files);
+});
 
 onMounted(async () => {
   await loadSettings();
