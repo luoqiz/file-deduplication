@@ -955,6 +955,7 @@ dependencies = [
  "tauri-plugin-opener",
  "tokio",
  "tokio-macros 0.2.6",
+ "toml 0.8.2",
 ]
 
 [[package]]

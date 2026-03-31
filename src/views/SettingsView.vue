@@ -68,6 +68,9 @@ const {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
 }
 
 .setting-panel {

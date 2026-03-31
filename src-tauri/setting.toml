@@ -1,0 +1,8 @@
+selectedFolder = ""
+operationMode = "copy"
+backupStrategy = "source"
+dryRun = false
+sourceFolder = "jpg"
+backupFolder = "arw"
+sourceExtensions = [".jpg"]
+backupExtensions = [".ARW"]

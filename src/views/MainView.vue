@@ -3,6 +3,8 @@
   <div class="main-view">
     <div class="main-card">
       <h3>主程序</h3>
+     <button @click="handleSelectFolder" class="btn btn-primary" title="点击选择要整理的主目录">选择文件夹</button>
+      <p class="hint-text">点击按钮选择要整理的主目录，选择后即可开始执行。</p>
       <p>当前已选择文件夹: {{ selectedFolder || '未选择' }}</p>
       <button @click="handleConfirm" :disabled="confirmButtonDisabled" class="btn btn-confirm">
         执行整理
@@ -27,7 +29,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onMounted } from "vue";
 import { useSettings } from "@/composables/useSettings";
 import { useFileOperations } from "@/composables/useFileOperations";
 
@@ -37,7 +39,8 @@ const {
   backupStrategy,
   sourcePanel,
   backupPanel,
-  dryRun
+  dryRun,
+  loadSettings,
 } = useSettings();
 
 const {
@@ -45,14 +48,37 @@ const {
   result,
   processFiles,
   clearResult,
-  exportResult
+  exportResult,
+  selectMainFolder,
+  listFolder
 } = useFileOperations();
 
 const confirmButtonDisabled = computed(
-  () => processing.value || !sourcePanel.value.selectedFolder || !backupPanel.value.selectedFolder
+  () => processing.value || !selectedFolder.value,
 );
 
+onMounted(async () => {
+  await loadSettings();
+});
+
+async function handleSelectFolder() {
+  const folder = await selectMainFolder();
+  if (!folder) return;
+
+  selectedFolder.value = folder;
+  const folders = await listFolder(folder);
+  sourcePanel.value.folders = folders;
+  backupPanel.value.folders = folders;
+}
+
 async function handleConfirm() {
+  await loadSettings();
+
+  if (!selectedFolder.value) {
+    alert("请先选择文件夹");
+    return;
+  }
+
   if (!sourcePanel.value.selectedFolder || !backupPanel.value.selectedFolder) {
     alert("请同时选择源目录和备目录");
     return;
@@ -86,6 +112,9 @@ async function handleConfirm() {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  flex: 1;
+    min-height: 0;
+    overflow: auto;
 }
 
 .main-card,
@@ -100,6 +129,11 @@ async function handleConfirm() {
   margin-top: 0;
 }
 
+.hint-text {
+  margin: 8px 0 0;
+  color: #555;
+  font-size: 13px;
+}
 .btn {
   padding: 8px 16px;
   border: 1px solid #ccc;
@@ -119,6 +153,10 @@ async function handleConfirm() {
   border-color: #28a745;
 }
 
+.btn-primary {
+  color: #000;
+  font-weight: bold;
+}
 .btn-secondary {
   background: #6c757d;
   color: white;
@@ -142,4 +180,5 @@ async function handleConfirm() {
   font-weight: bold;
   margin-top: 8px;
 }
+
 </style>
