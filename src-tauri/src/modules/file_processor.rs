@@ -4,6 +4,25 @@ use std::path::{Path, PathBuf};
 
 use crate::modules::file_utils::*;
 
+fn collect_files_from_dirs(
+    dirs: &[PathBuf],
+    extensions: &[String],
+    recursive: bool,
+) -> Result<(std::collections::HashMap<String, PathBuf>, Vec<String>), String> {
+    let mut files = std::collections::HashMap::new();
+    let mut skipped = Vec::new();
+
+    for dir in dirs {
+        let (dir_files, mut dir_skipped) = collect_files_with_unmatched(dir, extensions, recursive)?;
+        for (name, path) in dir_files {
+            files.entry(name).or_insert(path);
+        }
+        skipped.append(&mut dir_skipped);
+    }
+
+    Ok((files, skipped))
+}
+
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct OrganizeResult {
     pub moved_files: Vec<String>,
@@ -14,20 +33,46 @@ pub struct OrganizeResult {
 #[tauri::command]
 pub async fn process_files(
     main_folder: String,
-    source_folder: String,
-    backup_folder: String,
+    source_folders: Vec<String>,
+    backup_folders: Vec<String>,
     source_extensions: Vec<String>,
     backup_extensions: Vec<String>,
     mode: String,
     _backup_strategy: String,
     dry_run: bool,
+    include_subdirectories: bool,
 ) -> Result<OrganizeResult, String> {
     let main_path = PathBuf::from(&main_folder);
-    let source_path = main_path.join(&source_folder);
-    let backup_path = main_path.join(&backup_folder);
+    let source_paths = if source_folders.is_empty() {
+        vec![main_path.clone()]
+    } else {
+        source_folders.iter().map(|folder| main_path.join(folder)).collect()
+    };
+    let backup_paths = if backup_folders.is_empty() {
+        vec![main_path.clone()]
+    } else {
+        backup_folders.iter().map(|folder| main_path.join(folder)).collect()
+    };
 
-    validate_path(&source_path)?;
-    validate_path(&backup_path)?;
+    let mut valid_source_paths = Vec::new();
+    let mut valid_backup_paths = Vec::new();
+    let mut skipped_files = Vec::new();
+
+    for path in source_paths {
+        if path.exists() && path.is_dir() {
+            valid_source_paths.push(path);
+        } else {
+            skipped_files.push(format!("源目录不存在，已跳过: {}", path.display()));
+        }
+    }
+
+    for path in backup_paths {
+        if path.exists() && path.is_dir() {
+            valid_backup_paths.push(path);
+        } else {
+            skipped_files.push(format!("备目录不存在，已跳过: {}", path.display()));
+        }
+    }
 
     let mode = mode.to_lowercase();
     let folder_name = if mode == "move" { "move" } else { "copy" };
@@ -42,8 +87,8 @@ pub async fn process_files(
     }
     let output_prefix = format!("{}/{}", folder_name, main_folder_name);
 
-    let (source_files, mut source_skipped) = collect_files_with_unmatched(&source_path, &source_extensions)?;
-    let (backup_files, mut backup_skipped) = collect_files_with_unmatched(&backup_path, &backup_extensions)?;
+    let (source_files, mut source_skipped) = collect_files_from_dirs(&valid_source_paths, &source_extensions, include_subdirectories)?;
+    let (backup_files, mut backup_skipped) = collect_files_from_dirs(&valid_backup_paths, &backup_extensions, include_subdirectories)?;
 
     let mut moved_files = Vec::new();
     let mut skipped_files = Vec::new();

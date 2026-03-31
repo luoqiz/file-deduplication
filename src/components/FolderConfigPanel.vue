@@ -5,7 +5,7 @@
       <h4>{{ title }}</h4>
       <div class="folder-list">
         <div v-for="folder in folders" :key="folder" class="folder-item"
-          :class="{ selected: selectedFolder === folder }" @click="$emit('update:selectedFolder', folder)">
+          :class="{ selected: selectedFolders.includes(folder) }" @click="toggleFolder(folder)">
           📁 {{ folder }}
         </div>
       </div>
@@ -41,7 +41,7 @@ const commonExtensions = [
 interface Props {
   title: string;
   folders: string[];
-  selectedFolder: string;
+  selectedFolders: string[];
   selectedExtensions: Set<string>;
   customExtension: string;
 }
@@ -49,7 +49,7 @@ interface Props {
 const props = defineProps<Props>();
 
 const emit = defineEmits<{
-  'update:selectedFolder': [value: string];
+  'update:selectedFolders': [value: string[]];
   'update:selectedExtensions': [value: Set<string>];
   'update:customExtension': [value: string];
 }>();
@@ -57,6 +57,17 @@ const emit = defineEmits<{
 function handleCustomExtensionInput(event: Event) {
   const target = event.target as HTMLInputElement;
   emit('update:customExtension', target.value);
+}
+
+function toggleFolder(folder: string) {
+  const newFolders = [...props.selectedFolders];
+  const index = newFolders.indexOf(folder);
+  if (index >= 0) {
+    newFolders.splice(index, 1);
+  } else {
+    newFolders.push(folder);
+  }
+  emit('update:selectedFolders', newFolders);
 }
 
 function toggleExtension(ext: string) {

@@ -14,14 +14,15 @@ export interface SettingsData {
   operationMode: OperationMode;
   backupStrategy: BackupStrategy;
   dryRun: boolean;
-  sourceFolder: string;
-  backupFolder: string;
+  includeSubdirectories: boolean;
+  sourceFolders: string[];
+  backupFolders: string[];
   sourceExtensions: string[];
   backupExtensions: string[];
 }
 
 export interface FolderPanel {
-  selectedFolder: string;
+  selectedFolders: string[];
   selectedExtensions: Set<string>;
   customExtension: string;
   folders: string[];

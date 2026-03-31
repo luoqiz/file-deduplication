@@ -10,9 +10,15 @@ pub struct Settings {
     pub operation_mode: String,
     pub backup_strategy: String,
     pub dry_run: bool,
-    pub source_folder: String,
-    pub backup_folder: String,
+    #[serde(default)]
+    pub include_subdirectories: bool,
+    #[serde(default, alias = "sourceFolder", alias = "source_folder")]
+    pub source_folders: Vec<String>,
+    #[serde(default, alias = "backupFolder", alias = "backup_folder")]
+    pub backup_folders: Vec<String>,
+    #[serde(default, alias = "sourceExtensions", alias = "source_extensions")]
     pub source_extensions: Vec<String>,
+    #[serde(default, alias = "backupExtensions", alias = "backup_extensions")]
     pub backup_extensions: Vec<String>,
 }
 

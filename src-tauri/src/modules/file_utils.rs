@@ -3,41 +3,37 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 
-pub fn validate_path(path: &Path) -> Result<(), String> {
-    if !path.exists() {
-        Err(format!("路径不存在: {}", path.display()))
-    } else if !path.is_dir() {
-        Err(format!("不是目录: {}", path.display()))
-    } else {
-        Ok(())
-    }
-}
-
 pub fn collect_files_with_unmatched(
     dir_path: &Path,
     extensions: &[String],
+    recursive: bool,
 ) -> Result<(HashMap<String, PathBuf>, Vec<String>), String> {
     let mut files = HashMap::new();
     let mut skipped = Vec::new();
+    let mut dirs = vec![dir_path.to_path_buf()];
 
-    if let Ok(entries) = fs::read_dir(dir_path) {
-        for entry in entries.flatten() {
-            if let Ok(metadata) = entry.metadata() {
-                if metadata.is_file() {
-                    if let Some(file_name) = entry.file_name().to_str() {
-                        let file_path = entry.path();
-                        if let Some(ext) = file_path.extension() {
-                            if let Some(ext_str) = ext.to_str() {
-                                let ext_with_dot = format!(".{}", ext_str).to_lowercase();
-                                if is_extension_match(&ext_with_dot, extensions) {
-                                    files.insert(file_name.to_string(), file_path);
-                                } else {
-                                    skipped.push(format!("文件后缀不匹配: {}", file_name));
+    while let Some(current_dir) = dirs.pop() {
+        if let Ok(entries) = fs::read_dir(&current_dir) {
+            for entry in entries.flatten() {
+                let path = entry.path();
+                if let Ok(metadata) = entry.metadata() {
+                    if metadata.is_file() {
+                        if let Some(file_name) = entry.file_name().to_str() {
+                            if let Some(ext) = path.extension() {
+                                if let Some(ext_str) = ext.to_str() {
+                                    let ext_with_dot = format!(".{}", ext_str).to_lowercase();
+                                    if is_extension_match(&ext_with_dot, extensions) {
+                                        files.insert(file_name.to_string(), path.clone());
+                                    } else {
+                                        skipped.push(format!("文件后缀不匹配: {}", file_name));
+                                    }
                                 }
+                            } else {
+                                skipped.push(format!("文件无后缀，已跳过: {}", file_name));
                             }
-                        } else {
-                            skipped.push(format!("文件无后缀，已跳过: {}", file_name));
                         }
+                    } else if metadata.is_dir() && recursive {
+                        dirs.push(path);
                     }
                 }
             }

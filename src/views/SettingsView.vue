@@ -25,18 +25,24 @@
           <option value="newest">最新修改</option>
         </select>
       </div>
+      <div class="subdir-selector">
+        <label>
+          <input type="checkbox" v-model="includeSubdirectories" /> 读取子目录
+        </label>
+        <p class="subdir-hint">默认仅读取当前目录文件，勾选后会扫描所有子目录。</p>
+      </div>
     </div>
 
     <div class="setting-panel">
       <h3>源目录配置</h3>
-      <FolderConfigPanel v-model:selected-folder="sourcePanel.selectedFolder"
+      <FolderConfigPanel v-model:selected-folders="sourcePanel.selectedFolders"
         v-model:selected-extensions="sourcePanel.selectedExtensions"
         v-model:custom-extension="sourcePanel.customExtension" :folders="sourcePanel.folders" title="源目录" />
     </div>
 
     <div class="setting-panel">
       <h3>备目录配置</h3>
-      <FolderConfigPanel v-model:selected-folder="backupPanel.selectedFolder"
+      <FolderConfigPanel v-model:selected-folders="backupPanel.selectedFolders"
         v-model:selected-extensions="backupPanel.selectedExtensions"
         v-model:custom-extension="backupPanel.customExtension" :folders="backupPanel.folders" title="备目录" />
     </div>
@@ -56,6 +62,7 @@ const {
   operationMode,
   backupStrategy,
   dryRun,
+  includeSubdirectories,
   sourcePanel,
   backupPanel,
   saveSettings,
@@ -106,6 +113,22 @@ const {
   padding: 4px 6px;
   border: 1px solid #ccc;
   border-radius: 4px;
+}
+
+.subdir-selector {
+  margin-top: 10px;
+}
+
+.subdir-selector label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.subdir-hint {
+  margin: 6px 0 0 24px;
+  color: #666;
+  font-size: 12px;
 }
 
 .btn {

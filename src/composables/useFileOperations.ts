@@ -31,13 +31,14 @@ export function useFileOperations() {
 
   async function processFiles(params: {
     mainFolder: string;
-    sourceFolder: string;
-    backupFolder: string;
+    sourceFolders: string[];
+    backupFolders: string[];
     sourceExtensions: string[];
     backupExtensions: string[];
     mode: string;
     backupStrategy: string;
     dryRun: boolean;
+    includeSubdirectories: boolean;
   }) {
     try {
       processing.value = true;

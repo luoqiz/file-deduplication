@@ -37,6 +37,7 @@ const {
   selectedFolder,
   operationMode,
   backupStrategy,
+  includeSubdirectories,
   sourcePanel,
   backupPanel,
   dryRun,
@@ -69,34 +70,34 @@ async function handleSelectFolder() {
   const folders = await listFolder(folder);
   sourcePanel.value.folders = folders;
   backupPanel.value.folders = folders;
+  sourcePanel.value.selectedFolders = [];
+  backupPanel.value.selectedFolders = [];
 }
 
 async function handleConfirm() {
   await loadSettings();
 
   if (!selectedFolder.value) {
-    alert("请先选择文件夹");
+    alert("请先选择主目录");
     return;
   }
 
-  if (!sourcePanel.value.selectedFolder || !backupPanel.value.selectedFolder) {
-    alert("请同时选择源目录和备目录");
-    return;
-  }
+  // 源目录或备目录可不选，未选则默认读取主目录
 
   try {
     const sourceExts = Array.from(sourcePanel.value.selectedExtensions);
     const backupExts = Array.from(backupPanel.value.selectedExtensions);
 
-    const res = await processFiles({
+    await processFiles({
       mainFolder: selectedFolder.value,
-      sourceFolder: sourcePanel.value.selectedFolder,
-      backupFolder: backupPanel.value.selectedFolder,
+      sourceFolders: sourcePanel.value.selectedFolders,
+      backupFolders: backupPanel.value.selectedFolders,
       sourceExtensions: sourceExts,
       backupExtensions: backupExts,
       mode: operationMode.value,
       backupStrategy: backupStrategy.value,
       dryRun: dryRun.value,
+      includeSubdirectories: includeSubdirectories.value,
     });
 
     // const action = dryRun.value ? "预览" : "整理";

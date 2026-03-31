@@ -9,16 +9,17 @@ const backupStrategy = ref<"source" | "backup" | "largest" | "newest">(
   "source",
 );
 const dryRun = ref(false);
+const includeSubdirectories = ref(false);
 
 const sourcePanel = ref<FolderPanel>({
-  selectedFolder: "",
+  selectedFolders: [],
   selectedExtensions: new Set<string>(),
   customExtension: "",
   folders: [],
 });
 
 const backupPanel = ref<FolderPanel>({
-  selectedFolder: "",
+  selectedFolders: [],
   selectedExtensions: new Set<string>(),
   customExtension: "",
   folders: [],
@@ -36,8 +37,9 @@ async function loadSettings() {
     operationMode.value = data.operationMode || "copy";
     backupStrategy.value = data.backupStrategy || "source";
     dryRun.value = data.dryRun || false;
-    sourcePanel.value.selectedFolder = data.sourceFolder || "";
-    backupPanel.value.selectedFolder = data.backupFolder || "";
+    includeSubdirectories.value = data.includeSubdirectories || false;
+    sourcePanel.value.selectedFolders = data.sourceFolders || [];
+    backupPanel.value.selectedFolders = data.backupFolders || [];
     sourcePanel.value.selectedExtensions = new Set(
       data.sourceExtensions || [],
     );
@@ -56,8 +58,9 @@ async function saveSettings() {
       operationMode: operationMode.value,
       backupStrategy: backupStrategy.value,
       dryRun: dryRun.value,
-      sourceFolder: sourcePanel.value.selectedFolder,
-      backupFolder: backupPanel.value.selectedFolder,
+      includeSubdirectories: includeSubdirectories.value,
+      sourceFolders: sourcePanel.value.selectedFolders,
+      backupFolders: backupPanel.value.selectedFolders,
       sourceExtensions: Array.from(sourcePanel.value.selectedExtensions),
       backupExtensions: Array.from(backupPanel.value.selectedExtensions),
     };
@@ -78,6 +81,7 @@ export function useSettings() {
     operationMode,
     backupStrategy,
     dryRun,
+    includeSubdirectories,
     sourcePanel,
     backupPanel,
     loadSettings,
