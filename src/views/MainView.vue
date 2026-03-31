@@ -99,8 +99,8 @@ async function handleConfirm() {
       dryRun: dryRun.value,
     });
 
-    const action = dryRun.value ? "预览" : "整理";
-    alert(`文件${action}完成！\n已处理：${res.moved_files.length}，跳过：${res.skipped_files.length}`);
+    // const action = dryRun.value ? "预览" : "整理";
+    // alert(`文件${action}完成！\n已处理：${res.moved_files.length}，跳过：${res.skipped_files.length}`);
   } catch (error) {
     alert("文件整理失败: " + error);
   }

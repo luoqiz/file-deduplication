@@ -1,4 +1,4 @@
-selectedFolder = ""
+selectedFolder = 'F:\raw'
 operationMode = "copy"
 backupStrategy = "source"
 dryRun = false

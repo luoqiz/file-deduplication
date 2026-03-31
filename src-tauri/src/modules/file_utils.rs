@@ -13,48 +13,6 @@ pub fn validate_path(path: &Path) -> Result<(), String> {
     }
 }
 
-pub fn choose_preferred_by_strategy(source_path: &Path, backup_path: &Path, strategy: &str) -> bool {
-    if strategy == "source" {
-        return true;
-    }
-    if strategy == "backup" {
-        return false;
-    }
-
-    let source_meta = source_path.metadata();
-    let backup_meta = backup_path.metadata();
-
-    if let (Ok(source_meta), Ok(backup_meta)) = (source_meta, backup_meta) {
-        let source_size = source_meta.len();
-        let backup_size = backup_meta.len();
-        let source_modified = source_meta.modified().ok();
-        let backup_modified = backup_meta.modified().ok();
-
-        if strategy == "largest" {
-            if source_size != backup_size {
-                return source_size > backup_size;
-            }
-        }
-
-        if strategy == "newest" {
-            if let (Some(source_time), Some(backup_time)) = (source_modified, backup_modified) {
-                return source_time >= backup_time;
-            }
-        }
-
-        if source_size != backup_size {
-            return source_size > backup_size;
-        }
-
-        if let (Some(source_time), Some(backup_time)) = (source_modified, backup_modified) {
-            return source_time >= backup_time;
-        }
-    }
-
-    // 默认以来源优先
-    true
-}
-
 pub fn collect_files_with_unmatched(
     dir_path: &Path,
     extensions: &[String],
