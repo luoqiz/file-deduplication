@@ -2,6 +2,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 #[tokio::main]
-async  fn main() {
+async fn main() {
     file_deduplication_lib::run()
 }

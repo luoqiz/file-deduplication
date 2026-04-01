@@ -2,6 +2,40 @@
 
 一个基于 Tauri + Vue 3 + Rust 的跨平台文件去重和整理工具。快速识别并整理重复文件，按文件类型自动分类。
 
+## 🏗️ 项目结构
+
+### 前端 (Vue 3 + TypeScript)
+
+```
+src/
+├── components/          # 可复用组件
+│   ├── Sidebar.vue      # 侧边栏导航
+│   └── FolderConfigPanel.vue  # 文件夹配置面板
+├── views/               # 页面级组件
+│   ├── MainView.vue     # 主程序页面
+│   ├── SettingsView.vue # 设置页面
+│   └── ResultsView.vue  # 结果页面
+├── composables/         # 组合式函数
+│   ├── useSettings.ts   # 设置管理
+│   └── useFileOperations.ts  # 文件操作
+├── types/               # 类型定义
+│   └── index.ts         # 全局类型
+├── App.vue              # 根组件
+└── main.ts              # 应用入口
+```
+
+### 后端 (Rust)
+
+```
+src-tauri/src/
+├── lib.rs               # 主入口文件
+└── modules/             # 功能模块
+    ├── mod.rs           # 模块声明
+    ├── file_selector.rs # 文件选择功能
+    ├── file_processor.rs # 文件处理逻辑
+    └── file_utils.rs    # 文件工具函数
+```
+
 ## ✨ 核心功能
 
 ### 🎯 主要特性

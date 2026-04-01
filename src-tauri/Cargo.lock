@@ -945,7 +945,7 @@ dependencies = [
 
 [[package]]
 name = "file-deduplication"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "rfd",
  "serde",
@@ -955,6 +955,7 @@ dependencies = [
  "tauri-plugin-opener",
  "tokio",
  "tokio-macros 0.2.6",
+ "toml 0.8.2",
 ]
 
 [[package]]

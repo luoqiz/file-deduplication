@@ -1,0 +1,9 @@
+selectedFolder = 'F:\raw'
+operationMode = "copy"
+backupStrategy = "source"
+dryRun = false
+includeSubdirectories = true
+sourceFolders = []
+backupFolders = ["arw"]
+sourceExtensions = [".jpg"]
+backupExtensions = [".ARW"]
