@@ -1,6 +1,6 @@
 [package]
 name = "file-deduplication"
-version = "0.1.1"
+version = "0.1.2"
 description = "A Tauri App"
 authors = ["you"]
 edition = "2021"
@@ -26,5 +26,6 @@ rfd = "0.14"
 tokio = { version = "1",  features = ["full"] }
 tokio-macros = { version = "0.2.0-alpha.6" }
 toml = "0.8"
+
 
 
